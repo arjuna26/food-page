@@ -18,39 +18,40 @@
                 </p>
             </div>
             <div class="col-span-6 m-24 relative w-full h-full">
-                <div class="flex flex-col z-10 absolute top-[80%] translate-x-[180%]">
+                <div class="flex flex-col z-10 absolute top-[120%] translate-x-[180%]">
                     <h1 class="text-5xl font-primary font-bold" style="color: #EEEEEE">
+                    </h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #DADADA">
+                        4 USB Ports</h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #C6C7C8">
+                        2.8 x 1.97</h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #B2B3B4">
+                        TA-105, Grey</h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #9EA0A1">
+                        certified RoHS</h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #8A8C8D">
+                        220 volts</h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #76787A">
+                        489 5★ reviews</h1>
+                    <h1 class="text-5xl font-primary font-bold" style="color: #626466">
                         HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #EFEBE8">
+                    <h1 class="text-5xl font-primary font-bold" style="color: #4E5052">
                         HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F0E8E2">
+                    <h1 class="text-5xl font-primary font-bold" style="color: #3A3C3E">
                         HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F0E5DC">
+                    <h1 class="text-5xl font-primary font-bold" style="color: #393A3B">
                         HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F1E2D6">
+                    <h1 class="text-5xl font-primary font-bold" style="color: #383A3B">
                         HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F1DFD0">
+                    <h1 class="text-5xl font-primary font-bold" style="color: #3C3D3E">
                         HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F2DCCA">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F2D9C4">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F3D6BE">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #F3D3B8">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #EEC9A9">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #EAC099">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #E6B683">
-                        HELLO WORLD</h1>
-                    <h1 class="text-5xl font-primary font-bold" style="color: #E6AD6D">
+                    <h1 class="text-5xl font-primary font-bold" style="color: #3A3B3C">
                         HELLO WORLD</h1>
                 </div>
                 <img src="../icons/rectangle.svg" ref="expandingRect" alt=""
-                    class="fixed min-w-screen object-cover transition-transform duration-1000 ease-out opacity-70">
-                <img src="https://placehold.co/500x800" alt="Placeholder" class="absolute to transform">
+                    class="fixed min-w-screen transition-transform duration-1000 ease-out opacity-70">
+                <img src="https://images.squarespace-cdn.com/content/v1/5031e8d184ae7fae2e67d0ad/1582936781964-KUFG8CDVVDNY8WSEYAIA/Black-White-Still-Life-Evi-Abeler-Photographer.jpg"
+                    alt="Placeholder" class="absolute to transform w-[500px] h-[800px] ">
             </div>
         </div>
     </div>
@@ -60,69 +61,97 @@
 import { gsap } from 'gsap';
 
 export default {
-    name: 'Landing',
     data() {
         return {
-            scrollTween: null,
+            initialRectPosition: null,
             lastScrollY: 0,
-            initialRectPosition: null
+            scalingRect: null
         }
     },
     mounted() {
-        // Wait for DOM to be fully rendered
-        this.$nextTick(() => {
-            // Store initial rectangle position
-            if (this.$refs.expandingRect) {
-                // Keep the original position and styling as you had it
-                const rect = this.$refs.expandingRect.getBoundingClientRect();
-                this.initialRectPosition = {
-                    top: rect.top,
-                    left: rect.left,
-                    width: rect.width,
-                    height: rect.height
-                };
-            }
+        // Wait for DOM to be fully rendered AND images to load
+        window.addEventListener('load', this.initializeRect);
 
-            // Set up smooth scroll tracking with GSAP
-            this.setupScrollTracking();
-        });
+        // Fallback in case images are already loaded
+        if (document.readyState === 'complete') {
+            this.initializeRect();
+        }
     },
     beforeUnmount() {
-        // Clean up any GSAP animations
-        if (this.scrollTween) {
-            this.scrollTween.kill();
-        }
         window.removeEventListener('scroll', this.handleScroll);
+        window.removeEventListener('load', this.initializeRect);
+        // Clean up the clone if it exists
+        if (this.scalingRect && document.body.contains(this.scalingRect)) {
+            document.body.removeChild(this.scalingRect);
+        }
     },
     methods: {
+        initializeRect() {
+            if (this.$refs.expandingRect) {
+                // Hide the original rectangle immediately to prevent flash
+                this.$refs.expandingRect.style.opacity = '0';
+                
+                // Reset scroll position
+                window.scrollTo(0, 0);
+
+                // After a brief delay to ensure everything is settled
+                setTimeout(() => {
+                    // Get the exact position and dimensions after everything is loaded
+                    const rect = this.$refs.expandingRect.getBoundingClientRect();
+
+                    // Store the original values
+                    this.initialRectPosition = {
+                        top: rect.top,
+                        left: rect.left,
+                        width: rect.width,
+                        height: rect.height
+                    };
+
+                    // Clone the rectangle to a new element that will be fixed and scaled
+                    const clone = this.$refs.expandingRect.cloneNode(true);
+                    clone.id = 'scalingRect';
+
+                    // First, add it to DOM with visibility:hidden for proper positioning
+                    clone.style.visibility = 'hidden';
+                    document.body.appendChild(clone);
+
+                    // Then set all styles - using px for top instead of % which was causing the issue
+                    clone.style.position = 'fixed';
+                    clone.style.top = `${rect.top}px`;  // Fixed: was using % instead of px
+                    clone.style.left = `${rect.left}px`;
+                    clone.style.width = `${rect.width}px`;
+                    clone.style.height = `${rect.height}px`;
+                    clone.style.transformOrigin = 'center center';
+                    clone.style.zIndex = '5';
+                    clone.style.opacity = '0.7';
+                    clone.style.visibility = 'visible';
+                    clone.style.transition = 'none';
+
+                    // Store reference to the clone
+                    this.scalingRect = clone;
+
+                    // Set up scroll tracking
+                    this.setupScrollTracking();
+                }, 100);
+            }
+        },
         setupScrollTracking() {
-            // Add scroll event listener for performance
+            // Add scroll event listener
             window.addEventListener('scroll', this.handleScroll);
 
-            // Set up GSAP scroll-triggered animation
-            this.scrollTween = gsap.to(this.$refs.expandingRect, {
-                scale: 1, // Starting scale
-                paused: true, // We'll control the playhead manually
-                duration: 1, // This represents the full animation duration (not real-time)
-                ease: "power2.out" // Smoother easing
-            });
-
-            // Set initial state
-            gsap.set(this.$refs.expandingRect, {
-                scale: 1, // Start at original size
-                transformOrigin: "center center" // Expand from center
-            });
+            // Initialize at current scroll position
+            this.handleScroll();
         },
         handleScroll() {
-            if (!this.$refs.expandingRect) return;
+            if (!this.scalingRect || !this.initialRectPosition) return;
 
             // Get current scroll position
             const scrollY = window.scrollY;
 
             // Parameters for scaling
-            const startScroll = 100;
-            const endScroll = 3000; // Much higher value for slower expansion
-            const maxScale = 15;
+            const startScroll = 0;
+            const endScroll = 2000;
+            const maxScale = 5;
 
             // Calculate progress between 0 and 1
             let progress = 0;
@@ -130,13 +159,19 @@ export default {
                 progress = Math.min((scrollY - startScroll) / (endScroll - startScroll), 1);
             }
 
-            // Apply scale using GSAP for smoother animation
+            // Calculate target scale
             const targetScale = 1 + (progress * (maxScale - 1));
-            gsap.to(this.$refs.expandingRect, {
+
+            // Explicitly set the position each time to prevent drift
+            this.scalingRect.style.top = `${this.initialRectPosition.top}px`;
+            this.scalingRect.style.left = `${this.initialRectPosition.left}px`;
+
+            // Apply scale using GSAP to the clone
+            gsap.to(this.scalingRect, {
                 scale: targetScale,
-                duration: 0.3, // Short duration for smoother but responsive animation
-                overwrite: true, // Prevents animation queue build-up
-                ease: "power2.out" // Smooth easing
+                duration: 0.3,
+                overwrite: true,
+                ease: "power2.out"
             });
 
             this.lastScrollY = scrollY;
