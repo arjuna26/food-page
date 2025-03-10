@@ -1,6 +1,8 @@
 <template>
     <div class="relative w-full text-white overflow-hidden bg-darker" :style="{ height: `${detailItems.length * 100}vh` }">
         <!-- Fixed header elements -->
+        <img src="../icons/black-rectangle.svg" ref="blackRect" alt="" 
+        class="absolute origin-center">
         <div class="absolute top-0 w-full z-30 py-10">
             <div class="absolute right-24 flex flex-row gap-10 placeholder-yellow-200 opacity-50 top-[50px]">
                 <a href="https://instagram.com/your-account"><img src="../icons/instagram.svg" alt="ig" class="w-12"></a>
@@ -19,23 +21,26 @@
                 class="absolute origin-center">
         </div>
 
+        <!-- Vertical brand text -->
+        <div ref="brandText" class="fixed left-8 top-1/2 -translate-y-1/2 z-20 transform -rotate-180 text-mustard opacity-20">
+            <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+        </div>
+
+        <!-- Right vertical brand text -->
+        <div ref="brandTextRight" class="fixed right-8 top-2/3 -translate-y-1/2 z-20 text-mustard opacity-20">
+            <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+        </div>
+
         <!-- Main content container -->
         <div class="fixed inset-0 z-10 grid grid-cols-12 h-screen">
             <!-- Left column with title and content -->
             <div class="col-span-4 flex flex-col text-left gap-10 ml-24 mt-24 relative">
-                <!-- Title content wrapper for animation -->
-                <div ref="titleContent" class="transition-all duration-700">
-                    <h1 class="font-primary font-bold text-6xl text-light mb-10">
-                        TITLE
-                    </h1>
-                    <div class="border-b border-b-mustard w-2/3 mb-10"></div>
-                </div>
                 
                 <!-- Scroll progress indicator that appears when title slides away -->
                 <div ref="scrollProgress" class="absolute top-0 left-0 w-full opacity-0 transition-all duration-700">
                     <div class="flex flex-col gap-4">
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-light font-primary">progress</span>
+                            <span class="text-sm text-light font-primary"></span>
                             <span class="text-sm text-mustard">{{ activeIndex + 1 }} / {{ detailItems.length }}</span>
                         </div>
                         <div class="h-2 bg-gray-800 rounded-full w-full overflow-hidden">
@@ -68,22 +73,26 @@
                 </div>
             </div>
 
-            <!-- Right column with DETAILS and images -->
+            <!-- Right column with images and navigation -->
             <div class="col-span-8 relative h-full">
-                <!-- DETAILS text column -->
-                <div class="flex flex-col z-10 absolute top-[200px] right-[200px]">
-                    <div v-for="(item, index) in detailItems" 
-                        :key="index"
-                        class="flex items-center relative">
-                        
-                        <h1 
-                            ref="detailTexts"
-                            class="text-5xl font-primary font-bold mb-4 transition-colors duration-300 ease-in-out cursor-pointer"
-                            :style="{ color: activeIndex === index ? '#EEEEEE' : '#3A3C3E' }">
-                            {{ item.text }}
-                        </h1>
-                    </div>
-                </div>
+                <!-- Up arrow for navigation -->
+                <button 
+                    @click="navigateToSection('prev')" 
+                    class="absolute top-[100px] left-[100px] w-[500px] h-[40px] flex items-center justify-center text-mustard hover:text-white transition-colors duration-300 z-30"
+                    :class="{ 'opacity-50 cursor-not-allowed': activeIndex === 0 }"
+                    :disabled="activeIndex === 0"
+                >
+                    <svg viewBox="0 0 24 14" class="w-full h-full">
+                        <path 
+                            d="M 2 12 L 12 2 L 22 12" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            stroke-width="3" 
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                </button>
 
                 <!-- Image container -->
                 <div class="image-container absolute left-[100px] top-[200px] w-[500px] h-[500px] overflow-hidden z-20">
@@ -95,6 +104,25 @@
                         :class="`detail-image absolute w-full h-full object-cover transition-opacity duration-500 ${activeIndex === index ? 'opacity-100' : 'opacity-0'}`"
                         alt="Detail image">
                 </div>
+                
+                <!-- Down arrow for navigation -->
+                <button 
+                    @click="navigateToSection('next')" 
+                    class="absolute top-[760px] left-[100px] w-[500px] h-[40px] flex items-center justify-center text-mustard hover:text-white transition-colors duration-300 z-30"
+                    :class="{ 'opacity-50 cursor-not-allowed': activeIndex === detailItems.length - 1 }"
+                    :disabled="activeIndex === detailItems.length - 1"
+                >
+                    <svg viewBox="0 0 24 14" class="w-full h-full">
+                        <path 
+                            d="M 2 2 L 12 12 L 22 2" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            stroke-width="3" 
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -104,6 +132,15 @@
                 :key="index" 
                 :ref="`section${index}`"
                 class="h-screen w-full">
+            </div>
+        </div>
+
+        <!-- Credits row -->
+        <div class="fixed bottom-8 right-24 z-30 flex flex-col gap-2">
+            <div class="flex gap-6">
+                <a href="#" class="font-primary text-xs text-light hover:text-mustard transition-colors">Privacy Policy</a>
+                <a href="#" class="font-primary text-xs text-light hover:text-mustard transition-colors">Terms of Service</a>
+                <a href="#" class="font-primary text-xs text-light hover:text-mustard transition-colors">back to 1/9</a>
             </div>
         </div>
     </div>
@@ -117,11 +154,13 @@ export default {
         return {
             activeIndex: 0,
             lastScrollY: 0,
+            // Add a state tracker for the title to prevent unwanted animations
+            titleState: 'visible', // 'visible' or 'hidden'
             detailItems: [  // change these to product details, or if one product then different images of the product
                 {
-                    text: 'DETAILS 1',
+                    text: '',
                     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-                    description: 'A vibrant and colorful salad bowl featuring fresh vegetables, grains, and a variety of textures. Perfect for a nutritious and satisfying meal that is as beautiful as it is delicious.'
+                    description: ''
                 },
                 {
                     text: 'DETAILS 2',
@@ -172,22 +211,37 @@ export default {
             blackRectInitialSize: {
                 width: 1600,
                 height: 1000
-            }
+            },
+            // Add throttle timer for scroll events
+            scrollThrottleTimer: null,
+            // Cache document height to avoid recalculating it on every scroll
+            docHeight: 0,
+            // Cache window height
+            windowHeight: 0,
+            // Store animation timelines for reuse
+            animations: {
+                title: null,
+                progress: null
+            },
+            // Flag to prevent scroll handling during programmatic scrolling
+            isNavigating: false
         }
     },
     mounted() {
-        // Initialize all shapes
-        this.initializeParallaxRect();
-        this.initializeBlackRect();
-        this.initializeDetailDescriptions();
+        // Initialize all shapes at once with a single batch update
+        this.initializeElements();
+        
+        // Cache window height
+        this.windowHeight = window.innerHeight;
+        
+        // Add resize listener to update cached values
+        window.addEventListener('resize', this.handleResize);
         
         // Wait for DOM to be fully rendered AND images to load
-        window.addEventListener('load', () => {
-            this.calculateSectionPositions();
-        });
+        window.addEventListener('load', this.calculateSectionPositions);
         
-        // Set up scroll event listener
-        window.addEventListener('scroll', this.handleScroll);
+        // Set up throttled scroll event listener
+        window.addEventListener('scroll', this.throttledScrollHandler);
         
         // Fallback in case images are already loaded
         if (document.readyState === 'complete') {
@@ -198,13 +252,21 @@ export default {
         window.scrollTo(0, 0);
     },
     beforeUnmount() {
-        window.removeEventListener('scroll', this.handleScroll);
+        // Clean up all event listeners
+        window.removeEventListener('scroll', this.throttledScrollHandler);
         window.removeEventListener('load', this.calculateSectionPositions);
+        window.removeEventListener('resize', this.handleResize);
+        
+        // Clear any pending timers
+        if (this.scrollThrottleTimer) {
+            clearTimeout(this.scrollThrottleTimer);
+        }
     },
     methods: {
-        initializeParallaxRect() {
+        // Combine initialization methods into a single method for better performance
+        initializeElements() {
+            // Initialize rectangles
             if (this.$refs.parallaxRect) {
-                // Set rectangle to be centered with initial size
                 gsap.set(this.$refs.parallaxRect, {
                     width: this.rectInitialSize.width,
                     height: this.rectInitialSize.height,
@@ -216,10 +278,18 @@ export default {
                     opacity: 0.2
                 });
             }
-        },
-        
-        initializeDetailDescriptions() {
-            // Initialize all descriptions to be invisible except the active one
+            
+            if (this.$refs.blackRect) {
+                gsap.set(this.$refs.blackRect, {
+                    width: this.blackRectInitialSize.width,
+                    height: this.blackRectInitialSize.height,
+                    left: '900px',
+                    top: '200px',
+                    zIndex: 5
+                });
+            }
+            
+            // Initialize descriptions
             this.detailItems.forEach((_, index) => {
                 const descRef = this.$refs[`detailDescription${index}`];
                 if (descRef && descRef[0]) {
@@ -230,78 +300,240 @@ export default {
                     });
                 }
             });
+            
+            // Pre-create animation timelines for reuse
+            this.createAnimationTimelines();
         },
         
-        initializeBlackRect() {
-            if (this.$refs.blackRect) {
-                // Position black rectangle to be under the image with part sticking out
-                // The image is at left: 100px, top: 200px with width/height: 500px
-                // So we position the black rectangle to be partially under it
-                gsap.set(this.$refs.blackRect, {
-                    width: this.blackRectInitialSize.width,
-                    height: this.blackRectInitialSize.height,
-                    left: '900px', // Position to overlap with image but stick out on right
-                    top: '200px',  // Position to overlap with image but stick out on bottom
-                    
-                    zIndex: 5 // Ensure it's below the image (z-10) but above the yellow rectangle
-                });
-            }
+        // Create reusable animation timelines
+        createAnimationTimelines() {
+            // Make sure refs exist before creating animations
+            if (!this.$refs.titleContent || !this.$refs.scrollProgress) return;
+            
+            // Create title animations
+            this.animations.title = {
+                show: gsap.timeline({ paused: true })
+                    .to(this.$refs.titleContent, {
+                        x: 0,
+                        opacity: 1,
+                        duration: 0.7,
+                        ease: "power2.out"
+                    }),
+                hide: gsap.timeline({ paused: true })
+                    .to(this.$refs.titleContent, {
+                        x: -100,
+                        opacity: 0,
+                        duration: 0.7,
+                        ease: "power2.in"
+                    })
+            };
+            
+            // Create progress animations
+            this.animations.progress = {
+                show: gsap.timeline({ paused: true })
+                    .to(this.$refs.scrollProgress, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.7,
+                        ease: "power2.out"
+                    }),
+                hide: gsap.timeline({ paused: true })
+                    .to(this.$refs.scrollProgress, {
+                        opacity: 0,
+                        y: 20,
+                        duration: 0.5,
+                        ease: "power2.in"
+                    })
+            };
+            
+            // Set initial states for the elements
+            gsap.set(this.$refs.titleContent, { 
+                x: 0,
+                opacity: 1
+            });
+            
+            gsap.set(this.$refs.scrollProgress, {
+                opacity: 0,
+                y: 20
+            });
+            
+            // Initialize title state based on active index
+            this.titleState = this.activeIndex === 0 ? 'visible' : 'hidden';
+        },
+        
+        // Handle window resize
+        handleResize() {
+            // Update cached values
+            this.windowHeight = window.innerHeight;
+            this.docHeight = document.body.scrollHeight - this.windowHeight;
+            
+            // Recalculate section positions
+            this.calculateSectionPositions();
+        },
+        
+        // Throttle scroll handler for better performance
+        throttledScrollHandler() {
+            // Skip if a throttle is already in progress
+            if (this.scrollThrottleTimer) return;
+            
+            // Use requestAnimationFrame for smoother performance
+            this.scrollThrottleTimer = requestAnimationFrame(() => {
+                this.handleScroll();
+                this.scrollThrottleTimer = null;
+            });
         },
         
         calculateSectionPositions() {
             // Calculate the position of each section for scroll detection
             this.sectionPositions = [];
             
-            this.detailItems.forEach((_, index) => {
-                const sectionRef = this.$refs[`section${index}`];
+            // Use a more efficient loop
+            const sections = [];
+            for (let i = 0; i < this.detailItems.length; i++) {
+                const sectionRef = this.$refs[`section${i}`];
                 if (sectionRef && sectionRef[0]) {
-                    const rect = sectionRef[0].getBoundingClientRect();
-                    this.sectionPositions.push(rect.top + window.scrollY);
+                    sections.push(sectionRef[0]);
                 }
+            }
+            
+            // Batch DOM reads to avoid layout thrashing
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                this.sectionPositions.push(rect.top + window.scrollY);
             });
+            
+            // Cache document height
+            this.docHeight = document.body.scrollHeight - this.windowHeight;
             
             // Initial check for active section
             this.handleScroll();
         },
         
         handleScroll() {
-            const scrollY = window.scrollY;
-            const windowHeight = window.innerHeight;
-            const scrollMid = scrollY + (windowHeight / 2);
+            // Skip scroll handling if we're currently navigating programmatically
+            if (this.isNavigating) return;
             
-            // Determine which section is active based on scroll position
-            let newActiveIndex = 0;
-            for (let i = this.sectionPositions.length - 1; i >= 0; i--) {
-                if (scrollMid >= this.sectionPositions[i]) {
-                    newActiveIndex = i;
-                    break;
-                }
-            }
+            const scrollY = window.scrollY;
+            const scrollMid = scrollY + (this.windowHeight / 2);
+            
+            // Use binary search for more efficient section finding
+            let newActiveIndex = this.findActiveSection(scrollMid);
             
             // Update active index if changed
             if (newActiveIndex !== this.activeIndex) {
-                // Animate the text highlight transition
-                this.animateTextHighlight(this.activeIndex, newActiveIndex);
-                
-                // Animate the description transition
-                this.animateDescriptionTransition(this.activeIndex, newActiveIndex);
-                
+                // Batch animations together
+                this.updateActiveSection(this.activeIndex, newActiveIndex);
                 this.activeIndex = newActiveIndex;
-                
-                // Handle title visibility based on active index
-                this.handleTitleVisibility(newActiveIndex);
             }
             
-            // Parallax effect for rectangles
-            this.updateParallaxRect(scrollY);
-            this.updateBlackRect(scrollY);
+            // Only update parallax effects if scroll position changed significantly
+            if (Math.abs(scrollY - this.lastScrollY) > 5) {
+                // Calculate once and reuse
+                const scrollProgress = this.docHeight ? scrollY / this.docHeight : 0;
+                this.updateParallaxEffects(scrollProgress);
+                this.lastScrollY = scrollY;
+            }
+        },
+        
+        // Binary search for finding active section - much more efficient for large lists
+        findActiveSection(scrollMid) {
+            // For small lists, linear search is fine
+            if (this.sectionPositions.length < 10) {
+                for (let i = this.sectionPositions.length - 1; i >= 0; i--) {
+                    if (scrollMid >= this.sectionPositions[i]) {
+                        return i;
+                    }
+                }
+                return 0;
+            }
             
-            this.lastScrollY = scrollY;
+            // For larger lists, use binary search
+            let low = 0;
+            let high = this.sectionPositions.length - 1;
+            
+            while (low <= high) {
+                const mid = Math.floor((low + high) / 2);
+                
+                if (scrollMid < this.sectionPositions[mid]) {
+                    high = mid - 1;
+                } else if (mid < this.sectionPositions.length - 1 && 
+                          scrollMid >= this.sectionPositions[mid + 1]) {
+                    low = mid + 1;
+                } else {
+                    return mid;
+                }
+            }
+            
+            return 0;
+        },
+        
+        // Batch update all animations related to changing active section
+        updateActiveSection(oldIndex, newIndex) {
+            // Animate text highlights
+            this.animateTextHighlight(oldIndex, newIndex);
+            
+            // Animate descriptions
+            this.animateDescriptionTransition(oldIndex, newIndex);
+            
+            // Handle title visibility with state tracking
+            this.handleTitleVisibility(newIndex);
+        },
+        
+        // Update all parallax effects with a single progress value
+        updateParallaxEffects(scrollProgress) {
+            // Update main rectangle
+            if (this.$refs.parallaxRect) {
+                const scaleAmount = 1 + (scrollProgress * 5);
+                const opacityValue = 0.2 + (scrollProgress * 0.6);
+                
+                gsap.to(this.$refs.parallaxRect, {
+                    scale: scaleAmount,
+                    opacity: opacityValue,
+                    duration: 0.5,
+                    ease: "power1.out"
+                });
+            }
+            
+            // Update black rectangle
+            if (this.$refs.blackRect) {
+                const scaleAmount = 1 + Math.min(1, scrollProgress * 3);
+                
+                gsap.to(this.$refs.blackRect, {
+                    scale: scaleAmount,
+                    duration: 0.5,
+                    ease: "power1.out"
+                });
+            }
+
+            // Update brand text positions
+            if (this.$refs.brandText) {
+                const yOffset = scrollProgress * 100;
+                
+                gsap.to(this.$refs.brandText, {
+                    y: `${yOffset - 50}%`,
+                    duration: 0.5,
+                    ease: "power1.out"
+                });
+            }
+
+            // Update right brand text with opposite movement
+            if (this.$refs.brandTextRight) {
+                const yOffset = scrollProgress * -100; // Negative value for opposite direction
+                
+                gsap.to(this.$refs.brandTextRight, {
+                    y: `${yOffset - 50}%`,
+                    duration: 0.5,
+                    ease: "power1.out"
+                });
+            }
         },
         
         animateDescriptionTransition(oldIndex, newIndex) {
-            // Fade out the old description
+            // Get both refs at once to batch DOM access
             const oldDescRef = this.$refs[`detailDescription${oldIndex}`];
+            const newDescRef = this.$refs[`detailDescription${newIndex}`];
+            
+            // Batch animations together
             if (oldDescRef && oldDescRef[0]) {
                 gsap.to(oldDescRef[0], {
                     opacity: 0,
@@ -310,116 +542,109 @@ export default {
                 });
             }
             
-            // Fade in the new description
-            const newDescRef = this.$refs[`detailDescription${newIndex}`];
             if (newDescRef && newDescRef[0]) {
                 gsap.to(newDescRef[0], {
                     opacity: 1,
                     duration: 0.5,
-                    delay: 0.1, // Slight delay for a smoother transition
+                    delay: 0.1,
                     ease: 'power2.in'
                 });
             }
         },
         
         handleTitleVisibility(activeIndex) {
-            if (!this.$refs.titleContent || !this.$refs.scrollProgress) return;
+            if (!this.$refs.titleContent || !this.$refs.scrollProgress || !this.animations.title || !this.animations.progress) return;
             
+            // Use state tracking to prevent unwanted animations
             if (activeIndex === 0) {
-                // Show title content with slide-in animation for DETAILS 1
-                gsap.to(this.$refs.titleContent, {
-                    x: 0,
-                    opacity: 1,
-                    duration: 0.7,
-                    ease: "power2.out"
-                });
-                
-                // Hide scroll progress
-                gsap.to(this.$refs.scrollProgress, {
-                    opacity: 0,
-                    y: 20,
-                    duration: 0.5,
-                    ease: "power2.in"
-                });
+                // Only animate if title is currently hidden
+                if (this.titleState === 'hidden') {
+                    this.animations.title.show.restart();
+                    this.animations.progress.hide.restart();
+                    this.titleState = 'visible';
+                }
             } else {
-                // Hide title content with slide-out animation for other DETAILS
-                gsap.to(this.$refs.titleContent, {
-                    x: -100,
-                    opacity: 0,
-                    duration: 0.7,
-                    ease: "power2.in"
-                });
-                
-                // Show scroll progress with animation
-                gsap.to(this.$refs.scrollProgress, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.7,
-                    delay: 0.2,
-                    ease: "power2.out"
-                });
+                // Only animate if title is currently visible and we're moving away from first section
+                if (this.titleState === 'visible') {
+                    this.animations.title.hide.restart();
+                    this.animations.progress.show.restart();
+                    this.titleState = 'hidden';
+                }
             }
         },
         
-        updateParallaxRect(scrollY) {
-            if (!this.$refs.parallaxRect) return;
-            
-            // Calculate progress through the entire page (0 to 1)
-            const docHeight = document.body.scrollHeight - window.innerHeight;
-            const scrollProgress = scrollY / docHeight;
-            
-            // Create a simple expansion animation based on scroll progress
-            const scaleAmount = 1 + (scrollProgress * 5); // Scale from 1x to 6x
-            const opacityValue = 0.2 + (scrollProgress * 0.6); // Start low (0.2) and end high (0.8)
-            
-            gsap.to(this.$refs.parallaxRect, {
-                scale: scaleAmount,
-                opacity: opacityValue,
-                duration: 0.5,
-                ease: "power1.out"
-            });
-        },
-        
-        updateBlackRect(scrollY) {
-            if (!this.$refs.blackRect) return;
-            
-            // Calculate progress through the entire page (0 to 1)
-            const docHeight = document.body.scrollHeight - window.innerHeight;
-            const scrollProgress = scrollY / docHeight;
-            
-            // Create a limited expansion animation based on scroll progress
-            // Only scale up to 2x the original size
-            const scaleAmount = 1 + Math.min(1, scrollProgress * 3); // Scale from 1x to max 2x
-            
-            gsap.to(this.$refs.blackRect, {
-                scale: scaleAmount,
-                duration: 0.5,
-                ease: "power1.out"
-            });
-        },
-        
-        // Add a method to animate the text highlight transition
         animateTextHighlight(oldIndex, newIndex) {
-            // Get the text elements
             const textElements = this.$refs.detailTexts;
             if (!textElements) return;
             
-            // Animate the old text to dim
+            // Batch animations together
+            const animations = [];
+            
             if (textElements[oldIndex]) {
-                gsap.to(textElements[oldIndex], {
-                    color: '#3A3C3E',
-                    duration: 0.3,
-                    ease: 'power1.out'
-                });
+                animations.push(
+                    gsap.to(textElements[oldIndex], {
+                        color: '#3A3C3E',
+                        duration: 0.3,
+                        ease: 'power1.out'
+                    })
+                );
             }
             
-            // Animate the new text to highlight
             if (textElements[newIndex]) {
-                gsap.to(textElements[newIndex], {
-                    color: '#EEEEEE',
-                    duration: 0.3,
-                    ease: 'power1.out'
+                animations.push(
+                    gsap.to(textElements[newIndex], {
+                        color: '#EEEEEE',
+                        duration: 0.3,
+                        ease: 'power1.out'
+                    })
+                );
+            }
+        },
+        
+        // New method to handle navigation via arrows or clicking on details
+        navigateToSection(target) {
+            let newIndex;
+            
+            // Handle different types of navigation targets
+            if (target === 'next') {
+                newIndex = Math.min(this.activeIndex + 1, this.detailItems.length - 1);
+            } else if (target === 'prev') {
+                newIndex = Math.max(this.activeIndex - 1, 0);
+            } else if (typeof target === 'number') {
+                newIndex = target;
+            } else {
+                return; // Invalid target
+            }
+            
+            // Don't do anything if we're already at the target index
+            if (newIndex === this.activeIndex) return;
+            
+            // Set flag to prevent scroll handler from interfering
+            this.isNavigating = true;
+            
+            // Get the target section element
+            const targetSection = this.$refs[`section${newIndex}`];
+            if (targetSection && targetSection[0]) {
+                // Calculate the progress for parallax effects based on target section
+                const scrollProgress = newIndex / (this.detailItems.length - 1);
+                
+                // Update parallax effects immediately
+                this.updateParallaxEffects(scrollProgress);
+                
+                // Scroll to the target section
+                window.scrollTo({
+                    top: this.sectionPositions[newIndex],
+                    behavior: 'smooth'
                 });
+                
+                // Update active index and trigger animations
+                this.updateActiveSection(this.activeIndex, newIndex);
+                this.activeIndex = newIndex;
+                
+                // Reset navigation flag after animation completes
+                setTimeout(() => {
+                    this.isNavigating = false;
+                }, 1000); // Slightly longer than the scroll animation
             }
         }
     }
@@ -450,5 +675,28 @@ export default {
 .cursor-pointer:hover {
     transform: translateX(5px);
     transition: transform 0.3s ease;
+}
+
+/* Style for navigation arrows */
+button:not(:disabled):hover {
+    transform: scaleY(1.2);
+}
+
+button:not(:disabled):hover path {
+    stroke-width: 4;
+}
+
+button {
+    transition: all 0.3s ease;
+}
+
+button path {
+    transition: all 0.3s ease;
+}
+
+/* Vertical text styling */
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
 }
 </style>
