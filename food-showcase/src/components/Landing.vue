@@ -4,7 +4,7 @@
         <img src="../icons/black-rectangle.svg" ref="blackRect" alt="" 
         class="absolute origin-center">
         <div class="absolute top-0 w-full z-30 py-10">
-            <div class="absolute right-24 flex flex-row gap-10 placeholder-yellow-200 opacity-50 top-[50px]">
+            <div class="absolute left-24 flex flex-row gap-10 placeholder-yellow-200 opacity-50 top-[50px]">
                 <a href="https://instagram.com/your-account"><img src="../icons/instagram.svg" alt="ig" class="w-12"></a>
                 <a href="https://instagram.com/your-account"><img src="../icons/soundcloud.svg" alt="ig" class="w-12"></a>
             </div>
@@ -22,19 +22,38 @@
         </div>
 
         <!-- Vertical brand text -->
-        <div ref="brandText" class="fixed left-8 top-1/2 -translate-y-1/2 z-20 transform -rotate-180 text-mustard opacity-20">
-            <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+        <div ref="brandText" class="fixed right-[150px] h-screen  z-20  -rotate-180 text-mustard opacity-20">
+            <div class="animate-scroll-up">
+                <p class="vertical-text text-8xl font-primary tracking-widest ">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest ">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest ">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+            </div>
         </div>
 
         <!-- Right vertical brand text -->
-        <div ref="brandTextRight" class="fixed right-8 top-2/3 -translate-y-1/2 z-20 text-mustard opacity-20">
-            <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+        <div ref="brandTextRight" class="fixed right-[50px] h-screen z-20 text-mustard opacity-20">
+            <div class="animate-scroll-down">
+                <p class="vertical-text text-8xl font-primary tracking-widest pb-8">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest pb-8">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest pb-8">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+                <p class="vertical-text text-8xl font-primary tracking-widest">BRAND NAME</p>
+            </div>
         </div>
 
         <!-- Main content container -->
         <div class="fixed inset-0 z-10 grid grid-cols-12 h-screen">
             <!-- Left column with title and content -->
-            <div class="col-span-4 flex flex-col text-left gap-10 ml-24 mt-24 relative">
+            <div class="col-span-4 flex flex-col text-left gap-10 ml-24 mt-32 relative">
                 
                 <!-- Scroll progress indicator that appears when title slides away -->
                 <div ref="scrollProgress" class="absolute top-0 left-0 w-full opacity-0 transition-all duration-700">
@@ -136,7 +155,7 @@
         </div>
 
         <!-- Credits row -->
-        <div class="fixed bottom-8 right-24 z-30 flex flex-col gap-2">
+        <div class="fixed bottom-8 left-24 z-30 flex flex-col gap-2">
             <div class="flex gap-6">
                 <a href="#" class="font-primary text-xs text-light hover:text-mustard transition-colors">Privacy Policy</a>
                 <a href="#" class="font-primary text-xs text-light hover:text-mustard transition-colors">Terms of Service</a>
@@ -158,9 +177,9 @@ export default {
             titleState: 'visible', // 'visible' or 'hidden'
             detailItems: [  // change these to product details, or if one product then different images of the product
                 {
-                    text: '',
+                    text: 'Welcome',
                     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-                    description: ''
+                    description: 'How are you doing today?'
                 },
                 {
                     text: 'DETAILS 2',
@@ -698,5 +717,31 @@ button path {
 .vertical-text {
     writing-mode: vertical-rl;
     text-orientation: mixed;
+}
+
+@keyframes scrollUp {
+    from {
+        transform: translateY(0%);
+    }
+    to {
+        transform: translateY(-50%);
+    }
+}
+
+@keyframes scrollDown {
+    from {
+        transform: translateY(-50%);
+    }
+    to {
+        transform: translateY(0%);
+    }
+}
+
+.animate-scroll-up {
+    animation: scrollUp 20s linear infinite;
+}
+
+.animate-scroll-down {
+    animation: scrollDown 20s linear infinite;
 }
 </style>
