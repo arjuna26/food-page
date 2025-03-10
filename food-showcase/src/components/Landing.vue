@@ -53,12 +53,18 @@
                 
                 <!-- Description for the active detail item -->
                 <div class="mt-8">
-                    <h3 class="font-primary font-semibold text-3xl text-light mb-3">
-                        {{ detailItems[activeIndex].text }}
-                    </h3>
-                    <p class="font-primary text-light text-2xl leading-relaxed">
-                        {{ detailItems[activeIndex].description }}
-                    </p>
+                    <div v-for="(item, index) in detailItems" 
+                         :key="index"
+                         :ref="`detailDescription${index}`"
+                         class="detail-description absolute w-full transition-opacity duration-500"
+                         :class="activeIndex === index ? 'opacity-100' : 'opacity-0'">
+                        <h3 class="font-primary font-semibold text-3xl text-light mb-3">
+                            {{ item.text }}
+                        </h3>
+                        <p class="font-primary text-light text-2xl leading-relaxed">
+                            {{ item.description }}
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -173,6 +179,7 @@ export default {
         // Initialize all shapes
         this.initializeParallaxRect();
         this.initializeBlackRect();
+        this.initializeDetailDescriptions();
         
         // Wait for DOM to be fully rendered AND images to load
         window.addEventListener('load', () => {
@@ -209,6 +216,20 @@ export default {
                     opacity: 0.2
                 });
             }
+        },
+        
+        initializeDetailDescriptions() {
+            // Initialize all descriptions to be invisible except the active one
+            this.detailItems.forEach((_, index) => {
+                const descRef = this.$refs[`detailDescription${index}`];
+                if (descRef && descRef[0]) {
+                    gsap.set(descRef[0], {
+                        opacity: index === 0 ? 1 : 0,
+                        position: 'absolute',
+                        width: '100%'
+                    });
+                }
+            });
         },
         
         initializeBlackRect() {
@@ -261,6 +282,10 @@ export default {
             if (newActiveIndex !== this.activeIndex) {
                 // Animate the text highlight transition
                 this.animateTextHighlight(this.activeIndex, newActiveIndex);
+                
+                // Animate the description transition
+                this.animateDescriptionTransition(this.activeIndex, newActiveIndex);
+                
                 this.activeIndex = newActiveIndex;
                 
                 // Handle title visibility based on active index
@@ -272,6 +297,29 @@ export default {
             this.updateBlackRect(scrollY);
             
             this.lastScrollY = scrollY;
+        },
+        
+        animateDescriptionTransition(oldIndex, newIndex) {
+            // Fade out the old description
+            const oldDescRef = this.$refs[`detailDescription${oldIndex}`];
+            if (oldDescRef && oldDescRef[0]) {
+                gsap.to(oldDescRef[0], {
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: 'power2.out'
+                });
+            }
+            
+            // Fade in the new description
+            const newDescRef = this.$refs[`detailDescription${newIndex}`];
+            if (newDescRef && newDescRef[0]) {
+                gsap.to(newDescRef[0], {
+                    opacity: 1,
+                    duration: 0.5,
+                    delay: 0.1, // Slight delay for a smoother transition
+                    ease: 'power2.in'
+                });
+            }
         },
         
         handleTitleVisibility(activeIndex) {
@@ -381,6 +429,11 @@ export default {
 <style scoped>
 .detail-image {
     transition: opacity 0.5s ease-in-out;
+}
+
+.detail-description {
+    transition: opacity 0.5s ease-in-out;
+    position: relative;
 }
 
 /* Ensure the page has enough height for scrolling */
